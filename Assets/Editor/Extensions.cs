@@ -33,6 +33,12 @@ namespace UnityEditor.Extensions
             });
         }
 
+        [MenuItem("Tools/Find References")]
+        public static void FindReferences()
+        {
+            EditorWindow.GetWindow(typeof(FindReferencesWindow));
+        }
+
         /// <summary>
         /// Take Backup At BackUp location
         /// </summary>
@@ -99,11 +105,17 @@ namespace UnityEditor.Extensions
             colors.Add("magenta", Color.magenta);
             colors.Add("white", Color.white);
 
+            DirectoryInfo directoryInfo = new DirectoryInfo(@"Assets\Material");
+            if (!directoryInfo.Exists)
+            {
+                directoryInfo.Create();
+            }
+
             foreach (KeyValuePair<string, Color> color in colors)
             {
                 Material mat = new Material(Shader.Find("Standard"));
                 mat.color = color.Value;
-                string matName = @"Assets\Material\" + color.Key + ".mat";
+                string matName = @"Assets\Materials\" + color.Key + ".mat";
                 AssetDatabase.CreateAsset(mat, matName);
             }
             AssetDatabase.SaveAssets();
@@ -125,6 +137,22 @@ namespace UnityEditor.Extensions
         public static void BuildScenes()
         {
             EditorWindow.GetWindow(typeof(BuildScenesWindow));
+        }
+
+        [MenuItem("Tools/Place To Ground")]
+        public static void PlaceGameObjectsToGround()
+        {
+            RaycastHit ray;
+
+            GameObject go = Selection.activeGameObject;
+            if (Physics.Raycast(go.transform.position, -go.transform.up, out ray))
+            {
+                if (ray.distance > 0f)
+                {
+                    Vector3 newPosition = new Vector3(ray.point.x, go.GetComponent<Renderer>().bounds.size.y / 2f, ray.point.z);
+                    go.transform.position = newPosition;
+                }
+            }
         }
 
         #region Helper Functions
